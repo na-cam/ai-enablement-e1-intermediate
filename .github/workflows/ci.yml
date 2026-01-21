@@ -1,0 +1,88 @@
+name: Playwright Tests CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run Playwright Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Create reports directory
+        run: mkdir -p reports/junit reports/html-report
+
+      - name: Run tests (parallel, 2 browsers)
+        run: npm run test:ci
+        env:
+          CI: 'true'
+          BASE_URL: 'https://qa-sandbox.ni.htec.rs'
+
+      - name: Publish HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: html-report
+          path: reports/html-report
+          retention-days: 30
+
+      - name: Publish JUnit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-results
+          path: reports/junit
+          retention-days: 30
+
+      - name: Publish test videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-videos
+          path: test-results/**/video.webm
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Publish test traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-traces
+          path: test-results/**/trace.zip
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Publish test screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-screenshots
+          path: test-results/**/*.png
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "## Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "View the HTML report in the artifacts section" >> $GITHUB_STEP_SUMMARY

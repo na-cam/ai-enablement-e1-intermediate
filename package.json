@@ -1,0 +1,23 @@
+{
+  "name": "playwright-typescript-project",
+  "version": "1.0.0",
+  "description": "Playwright TypeScript automation project",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --project=ui-chromium --project=ui-webkit",
+    "test:api": "playwright test --project=api",
+    "test:all": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report reports/html-report",
+    "test:ci": "playwright test --reporter=list,junit,html --workers=50%",
+    "test:chromium": "playwright test --project=ui-chromium",
+    "test:webkit": "playwright test --project=ui-webkit"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.10.0",
+    "dotenv": "^16.3.1",
+    "typescript": "^5.3.0"
+  }
+}

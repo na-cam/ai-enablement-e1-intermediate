@@ -1,0 +1,20 @@
+{
+  "testCase1": {
+    "title": "Login Functionality Test",
+    "description": "Verify user can login with valid credentials",
+    "expectedResult": "User successfully logs in and sees dashboard",
+    "steps": ["Navigate to login page", "Enter valid credentials", "Click login button"]
+  },
+  "testCase2": {
+    "title": "Search Feature Test",
+    "description": "Verify search returns correct results",
+    "expectedResult": "Search displays matching items",
+    "steps": ["Enter search term", "Click search", "Verify results"]
+  },
+  "testCase3": {
+    "title": "Form Validation Test",
+    "description": "Verify form shows validation errors",
+    "expectedResult": "Required field errors are displayed",
+    "steps": ["Leave required fields empty", "Submit form", "Check error messages"]
+  }
+}
