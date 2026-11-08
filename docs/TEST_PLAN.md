@@ -317,13 +317,42 @@
 - **Retry Strategy**: 1 retry in CI, 0 locally
 - **Browsers**: Chromium (primary), WebKit (secondary)
 
-## 6. Reporting
+### Added in v2 (security, negative, performance, hybrid) (TC-031 to TC-039)
 
-- HTML Report: reports/html-report/
+| ID | Title | Type | Priority | Tags |
+|----|-------|------|----------|------|
+| TC-031 | Wrong password rejected, no token issued | API | High | negative, security |
+| TC-032 | Empty credentials rejected | API | Medium | negative |
+| TC-033 | Malformed bearer token rejected | API | High | security |
+| TC-034 | Create without title rejected | API | High | negative |
+| TC-035 | Create without token rejected (401) | API | High | security |
+| TC-036 | GET list responds within 3000 ms | API | Medium | performance |
+| TC-037 | POST create responds within 3000 ms | API | Medium | performance |
+| TC-038 | Bearer token injection skips UI login | UI+API | High | hybrid |
+| TC-039 | No XHR/fetch slower than SLOW_REQUEST_MS | UI+API | Medium | hybrid, performance |
+
+## 6. Traceability (plan id → spec)
+
+| Spec | Plan ids |
+|---|---|
+| tests/api/auth.api.spec.ts | TC-005, TC-023, TC-026, TC-031, TC-032, TC-033 |
+| tests/api/testcases.api.spec.ts | TC-016, TC-019, TC-022, TC-024, TC-025, TC-027, TC-028, TC-034, TC-035, TC-036, TC-037 |
+| tests/ui/login.ui.spec.ts | TC-001, TC-002, TC-003, TC-004 |
+| tests/ui/testcases.ui.spec.ts | TC-006, TC-009, TC-011, TC-015, TC-020 |
+| tests/ui/validations.ui.spec.ts | TC-012, TC-013, TC-018 |
+| tests/ui/hybrid.ui.spec.ts | TC-008, TC-038, TC-039 |
+
+Not automated as separate tests: TC-007 (covered by TC-006), TC-010 (covered by TC-025), TC-014 and TC-021 (server behaviour unverified), TC-017 (replaced by single-item TC-015, batch edit raced with parallel workers), TC-029/TC-030 (verified by the run configuration: 2 browsers in parallel, id-based cleanup).
+
+Data cleanup: every created test case is registered in `ApiClient` and deleted in fixture teardown (see rules.md section 3).
+
+## 6a. Reporting
+
+- HTML Report: reports/html-report/ (open with `npm run report`)
 - JUnit XML: reports/junit/results.xml
-- Videos: test-results/**/video.webm
-- Traces: On first retry
-- Screenshots: On failure
+- Videos, traces, screenshots: reports/test-results/
+- API + UI network logs: reports/logs/
+- CI artifact `playwright-report` = the whole reports/ folder
 
 ## 7. Exit Criteria
 

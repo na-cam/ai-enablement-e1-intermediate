@@ -2,87 +2,66 @@ name: Playwright Tests CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
+  schedule:
+    - cron: '0 1 * * *' # nightly, 01:00 UTC
   workflow_dispatch:
+    inputs:
+      test_env:
+        description: 'Target environment (TEST_ENV)'
+        default: 'qa'
 
 jobs:
-  test:
-    name: Run Playwright Tests
+  lint:
+    name: Static analysis
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
 
-      - name: Install dependencies
-        run: npm ci
+  test:
+    name: Tests (UI chromium + webkit, API)
+    needs: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CI: 'true'
+      TEST_ENV: ${{ github.event.inputs.test_env || 'qa' }}
+      TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
+      TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
-
-      - name: Create reports directory
-        run: mkdir -p reports/junit reports/html-report
-
-      - name: Run tests (parallel, 2 browsers)
+      - name: Run tests (parallel)
         run: npm run test:ci
-        env:
-          CI: 'true'
-          BASE_URL: 'https://qa-sandbox.ni.htec.rs'
 
-      - name: Publish HTML report
+      # Everything generated lives in ./reports (HTML, JUnit, videos, traces, logs).
+      # One artifact, and the job fails loudly if the folder is empty.
+      - name: Publish full report (HTML + videos + logs)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: html-report
-          path: reports/html-report
+          name: playwright-report
+          path: reports/
           retention-days: 30
+          if-no-files-found: error
 
-      - name: Publish JUnit results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: junit-results
-          path: reports/junit
-          retention-days: 30
-
-      - name: Publish test videos
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-videos
-          path: test-results/**/video.webm
-          retention-days: 7
-          if-no-files-found: ignore
-
-      - name: Publish test traces
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-traces
-          path: test-results/**/trace.zip
-          retention-days: 7
-          if-no-files-found: ignore
-
-      - name: Publish test screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-screenshots
-          path: test-results/**/*.png
-          retention-days: 7
-          if-no-files-found: ignore
-
-      - name: Test Summary
+      - name: Summary
         if: always()
         run: |
-          echo "## Test Results" >> $GITHUB_STEP_SUMMARY
-          echo "View the HTML report in the artifacts section" >> $GITHUB_STEP_SUMMARY
+          echo "## Test run (${TEST_ENV})" >> "$GITHUB_STEP_SUMMARY"
+          echo "Download the **playwright-report** artifact and open html-report/index.html." >> "$GITHUB_STEP_SUMMARY"

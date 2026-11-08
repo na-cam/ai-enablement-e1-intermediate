@@ -1,71 +1,62 @@
 trigger:
   branches:
-    include:
-      - main
-      - develop
+    include: [main, develop]
 
 pr:
   branches:
-    include:
-      - main
-      - develop
+    include: [main, develop]
+
+# Nightly run (UTC)
+schedules:
+  - cron: '0 1 * * *'
+    displayName: Nightly build
+    branches:
+      include: [main]
+    always: true
 
 pool:
   vmImage: 'ubuntu-latest'
 
+parameters:
+  - name: testEnv
+    displayName: Target environment
+    type: string
+    default: qa
+
 variables:
   CI: 'true'
-  BASE_URL: 'https://qa-sandbox.ni.htec.rs'
+  TEST_ENV: ${{ parameters.testEnv }}
 
 steps:
   - task: NodeTool@0
-    displayName: 'Install Node.js 20.x'
     inputs:
       versionSpec: '20.x'
 
   - script: npm ci
-    displayName: 'Install dependencies'
+    displayName: Install dependencies
 
-  - script: npx playwright install --with-deps
-    displayName: 'Install Playwright browsers'
+  - script: npm run typecheck && npm run lint
+    displayName: Static analysis
 
-  - script: mkdir -p reports/junit reports/html-report
-    displayName: 'Create reports directories'
+  - script: npx playwright install --with-deps chromium webkit
+    displayName: Install Playwright browsers
 
   - script: npm run test:ci
-    displayName: 'Run Playwright tests (parallel, 2 browsers)'
-    continueOnError: true
+    displayName: Run tests (parallel)
     env:
-      CI: $(CI)
-      BASE_URL: $(BASE_URL)
+      TEST_EMAIL: $(TEST_EMAIL)
+      TEST_PASSWORD: $(TEST_PASSWORD)
 
   - task: PublishTestResults@2
-    displayName: 'Publish JUnit test results'
     condition: always()
     inputs:
-      testResultsFormat: 'JUnit'
-      testResultsFiles: 'reports/junit/results.xml'
-      failTaskOnFailedTests: false
-      testRunTitle: 'Playwright Tests'
+      testResultsFormat: JUnit
+      testResultsFiles: reports/junit/results.xml
+      testRunTitle: Playwright ($(TEST_ENV))
 
   - task: PublishBuildArtifacts@1
-    displayName: 'Publish HTML report'
     condition: always()
+    displayName: Publish full report (HTML + videos + logs)
     inputs:
-      PathtoPublish: 'reports/html-report'
-      ArtifactName: 'html-report'
-      publishLocation: 'Container'
-
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish test videos'
-    condition: always()
-    inputs:
-      PathtoPublish: 'test-results'
-      ArtifactName: 'test-results'
-      publishLocation: 'Container'
-
-  - script: |
-      echo "## Test Results"
-      echo "HTML Report and videos published as artifacts"
-    displayName: 'Test summary'
-    condition: always()
+      PathtoPublish: reports
+      ArtifactName: playwright-report

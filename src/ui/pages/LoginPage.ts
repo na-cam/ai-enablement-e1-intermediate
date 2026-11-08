@@ -1,15 +1,8 @@
 import { expect } from '@playwright/test';
 import { BasePage } from './BasePage';
-import { ApiClient } from '../utils/apiClient';
 
 export class LoginPage extends BasePage {
-  readonly url = 'https://qa-sandbox.ni.htec.rs/login';
-  private apiClient: ApiClient;
-
-  constructor(page: any) {
-    super(page);
-    this.apiClient = new ApiClient(page.request);
-  }
+  readonly path = '/login';
 
   get emailInput() {
     return this.page.getByRole('textbox', { name: 'Email' });
@@ -35,27 +28,26 @@ export class LoginPage extends BasePage {
     return this.page.getByText('Password is required');
   }
 
-  async login(email: string, password: string) {
-    await this.goto(this.url);
+  async open(): Promise<void> {
+    await this.goto(this.path);
+  }
+
+  async login(email: string, password: string): Promise<void> {
+    await this.open();
     await this.type(this.emailInput, email);
     await this.type(this.passwordInput, password);
     await this.click(this.loginButton);
   }
 
-  async loginViaAPI(email: string, password: string): Promise<string> {
-    const result = await this.apiClient.login(email, password);
-    return result.token;
-  }
-
-  async assertLoginSuccess() {
+  async assertLoginSuccess(): Promise<void> {
     await expect(this.page).toHaveURL(/.*dashboard/);
   }
 
-  async assertLoginFailure() {
+  async assertLoginFailure(): Promise<void> {
     await expect(this.errorMessage).toBeVisible();
   }
 
-  async assertRequiredFieldErrors() {
+  async assertRequiredFieldErrors(): Promise<void> {
     await expect(this.emailRequiredError).toBeVisible();
     await expect(this.passwordRequiredError).toBeVisible();
   }

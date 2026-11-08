@@ -1,6 +1,9 @@
 node_modules/
+reports/
 test-results/
 playwright-report/
 playwright/.cache/
 .env
-reports/
+.env.*
+!.env.example
+!.env.*.example
