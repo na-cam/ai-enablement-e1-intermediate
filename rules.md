@@ -26,6 +26,7 @@ Never: positional selectors (`nth-child`), auto-generated class names.
 
 ## 3. Test data
 - Unique per test: `${title}-${Date.now()}-${random}`; never rely on data from another test.
+- Generated data comes from the factory `src/data/factories.ts` (`buildTestCase(overrides)`, `buildSteps(n)`): randomized, but reproducible with `FACTORY_SEED=<number>`. Tests override only the fields they care about.
 - Static inputs in `tests/data/*.json`; secrets only from env (`.env.<TEST_ENV>` / CI secrets), never committed.
 - **No junk left behind.** Anything a test creates is deleted by the fixture teardown (`api.cleanup()` deletes tracked ids/titles). Never "delete all" in tests — the account is shared by parallel workers.
 - `npm run cleanup` resets the sandbox after an aborted run.
@@ -51,6 +52,8 @@ Never: positional selectors (`nth-child`), auto-generated class names.
 - Every API call is logged by `ApiClient.send()` (method, url, status, duration, request/response body) to `reports/logs/api-worker<N>.log`.
 - Every UI XHR/fetch is logged by the overridden `page` fixture to `reports/logs/ui-worker<N>.log`.
 - JSON lines, one file per worker. Secrets (`authorization`, `password`, `token`, `refreshToken`) are redacted.
+
+- Performance: `npm run metrics` turns the API log into `reports/api-metrics.md` (calls, min/avg/p95/max per endpoint). CI prints it in the job summary and publishes it in the artifact. `reports/logs` is cleared at the start of every run.
 
 ## 8. Environments
 - `TEST_ENV` selects the environment (default `qa`); `.env.<TEST_ENV>` then `.env` are loaded; real env vars/CI secrets win. `BASE_URL` / `API_URL` override URLs.

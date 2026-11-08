@@ -344,6 +344,8 @@
 
 Not automated as separate tests: TC-007 (covered by TC-006), TC-010 (covered by TC-025), TC-014 and TC-021 (server behaviour unverified), TC-017 (replaced by single-item TC-015, batch edit raced with parallel workers), TC-029/TC-030 (verified by the run configuration: 2 browsers in parallel, id-based cleanup).
 
+Account lockout after repeated invalid logins is deliberately not automated: it would require repeatedly failing against the shared real account and could lock it for every other test. Invalid-credential handling is covered by TC-002, TC-003, TC-031 and TC-032.
+
 Data cleanup: every created test case is registered in `ApiClient` and deleted in fixture teardown (see rules.md section 3).
 
 ## 6a. Reporting

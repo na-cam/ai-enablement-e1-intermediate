@@ -1,13 +1,7 @@
 import { test, expect } from '../../src/fixtures';
-import { TestCase } from '../../src/api/types';
+import { buildTestCase } from '../../src/data/factories';
 
-const base = (title: string): Partial<TestCase> => ({
-  title,
-  description: 'API created',
-  expected_result: 'Expected',
-  automated: false,
-  test_steps: [{ value: 'Step 1' }],
-});
+const base = (title: string) => buildTestCase({ title });
 
 test.describe('API: Test cases', () => {
   test('TC-024: list returns an array', async ({ api }) => {

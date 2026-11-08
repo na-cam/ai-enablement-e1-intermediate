@@ -34,8 +34,15 @@ npm run report            # open the HTML report (reports/html-report)
 npm run lint && npm run typecheck
 npm run cleanup           # delete all test cases on the account (maintenance)
 npm run evidence:video    # build docs/evidence/test-run.mp4 from the last run's videos
+npm run metrics           # API response-time summary (reports/api-metrics.md), run after the tests
+npm run demo:failure      # run an intentionally failing test, save screenshot/video/trace to docs/evidence/failure-demo
 ```
-Other environment: `TEST_ENV=staging BASE_URL=https://... npm test` (or a `.env.staging` file).
+Other environment: copy `.env.staging.example` to `.env.staging`, then `TEST_ENV=staging npm test` (or set `BASE_URL`).
+
+## Evidence in the repo
+- `docs/evidence/test-run.mp4` — video of a full passing run
+- `docs/evidence/failure-demo/` — screenshot, video, trace of an intentional failing case
+- `docs/evidence/prompt-count.png` — prompt count estimate
 
 ## Reports and logs
 After a run, everything is under `reports/`:

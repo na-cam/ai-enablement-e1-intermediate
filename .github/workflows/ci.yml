@@ -49,6 +49,11 @@ jobs:
       - name: Run tests (parallel)
         run: npm run test:ci
 
+      - name: API performance metrics
+        if: always()
+        run: npm run metrics >> "$GITHUB_STEP_SUMMARY"
+        continue-on-error: true
+
       # Everything generated lives in ./reports (HTML, JUnit, videos, traces, logs).
       # One artifact, and the job fails loudly if the folder is empty.
       - name: Publish full report (HTML + videos + logs)

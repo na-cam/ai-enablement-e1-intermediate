@@ -16,7 +16,9 @@
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
     "cleanup": "tsx scripts/cleanup-test-data.ts",
-    "evidence:video": "node scripts/make-evidence-video.mjs"
+    "evidence:video": "node scripts/make-evidence-video.mjs",
+    "metrics": "tsx scripts/api-metrics.ts",
+    "demo:failure": "node scripts/run-failure-demo.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

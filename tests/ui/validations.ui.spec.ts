@@ -1,4 +1,5 @@
 import { test } from '../../src/fixtures';
+import { buildSteps, buildTestCase } from '../../src/data/factories';
 import { TestCasesPage } from '../../src/ui/pages/TestCasesPage';
 
 test.describe('UI: Field validation and boundaries', () => {
@@ -31,13 +32,9 @@ test.describe('UI: Field validation and boundaries', () => {
 
   test('TC-018: steps of an existing test case can be updated', async ({ authedPage, api }) => {
     const testCases = new TestCasesPage(authedPage);
-    const created = await api.createTestCase({
-      title: 'Update Steps',
-      description: 'Original description',
-      expected_result: 'Original result',
-      automated: false,
-      test_steps: [{ value: 'Original Step 1' }, { value: 'Original Step 2' }],
-    });
+    const created = await api.createTestCase(
+      buildTestCase({ title: 'Update Steps', test_steps: buildSteps(2) }),
+    );
 
     await authedPage.goto('/dashboard');
     await testCases.navigateToTestCases();

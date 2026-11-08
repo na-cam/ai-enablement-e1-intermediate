@@ -47,6 +47,11 @@ steps:
       TEST_EMAIL: $(TEST_EMAIL)
       TEST_PASSWORD: $(TEST_PASSWORD)
 
+  - script: npm run metrics
+    displayName: API performance metrics
+    condition: always()
+    continueOnError: true
+
   - task: PublishTestResults@2
     condition: always()
     inputs:
