@@ -16,7 +16,7 @@ on:
 jobs:
   lint:
     name: Static analysis
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -30,7 +30,7 @@ jobs:
   test:
     name: Tests (UI chromium + webkit, API)
     needs: lint
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
       CI: 'true'
